@@ -1,19 +1,18 @@
-# Archivos del sistema operativo
+# Archivos de sistema operativo
+.DS_Store
 Thumbs.db
-Desktop.ini
 
-# Carpetas de IDE (VS Code, PHPStorm, etc.)
+# Logs y archivos temporales
+*.log
+tmp/
+
+# Carpetas de configuración de IDEs (VS Code, PHPStorm, etc.)
 .vscode/
 .idea/
 *.swp
 
-# Logs de errores (si configuras error_log en PHP)
-*.log
+# Archivos subidos por usuarios e imagenes
+uploads/
 
-# NOTA SOBRE IMÁGENES:
-# Si quieres que el repositorio sirva de BACKUP completo, deja comentada la línea de abajo.
-# Si el repositorio es solo para CÓDIGO (y las imágenes pesan mucho), descoméntala.
-# /uploads/
-
-# Dependencias (si usas Composer en el futuro)
-/vendor/
+# Seguridad (Opcional: descomenta si no quieres subir contraseñas)
+# includes/db.php
