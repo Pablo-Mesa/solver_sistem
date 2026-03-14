@@ -1,5 +1,26 @@
+<<<<<<< HEAD
 # Directorio de archivos subidos por los usuarios.
 # Estos no deben formar parte del control de versiones.
 /uploads/
 
 # Archivos de configuración local (si los hubiera en el futuro)
+=======
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs y archivos temporales
+*.log
+tmp/
+
+# Carpetas de configuración de IDEs (VS Code, PHPStorm, etc.)
+.vscode/
+.idea/
+*.swp
+
+# Archivos subidos por usuarios e imagenes
+uploads/
+
+# Seguridad (Opcional: descomenta si no quieres subir contraseñas)
+# includes/db.php
+>>>>>>> 660d6248bdad75eec6b44937d1ea3ed9c620e404

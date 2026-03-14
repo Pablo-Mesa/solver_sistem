@@ -1,7 +1,11 @@
 <?php
 // Configuración de la conexión (Datos por defecto de WAMP)
 $host    = 'localhost';
+<<<<<<< HEAD
 $db      = 'solver_db_17022026'; // <-- CAMBIA ESTO por el nombre que creaste en phpMyAdmin
+=======
+$db      = 'solver_16022026'; // <-- CAMBIA ESTO por el nombre que creaste en phpMyAdmin
+>>>>>>> 660d6248bdad75eec6b44937d1ea3ed9c620e404
 $user    = 'root';
 $pass    = ''; // En WAMP, por defecto la contraseña de root está vacía
 $charset = 'utf8mb4';

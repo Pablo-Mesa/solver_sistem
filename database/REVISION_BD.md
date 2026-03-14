@@ -92,8 +92,11 @@ o
 - `docs/solver_db_17022026_estructura.sql`
 
 así queda en el proyecto y se puede versionar. El contenido que revisé es el de tu export (solo estructura); sirve para esta revisión y para futuras migraciones o documentación.
+<<<<<<< HEAD
 
 ---
 
 ## 5. Registro de Sincronización
 - **Prueba de conexión:** Configuración exitosa entre equipos (PC 2).
+=======
+>>>>>>> 660d6248bdad75eec6b44937d1ea3ed9c620e404
