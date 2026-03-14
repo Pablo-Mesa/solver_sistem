@@ -1,0 +1,5 @@
+# Directorio de archivos subidos por los usuarios.
+# Estos no deben formar parte del control de versiones.
+/uploads/
+
+# Archivos de configuración local (si los hubiera en el futuro)

@@ -1,0 +1,128 @@
+/* Estilos Globales y Reutilizables */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Fundamental para que el padding no rompa el ancho */
+}
+
+body { 
+    display: flex; 
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    padding: 0px; 
+    min-height: 100vh; /* Asegura que ocupe toda la altura para centrar verticalmente */
+    background-color: #f4f4f4; 
+}
+
+/* Tu estilo base se mantiene igual */
+.form-container { 
+    margin: 20px;
+    background: white; 
+    padding: 20px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    width: 100%; 
+    max-width: 400px; 
+    box-sizing: border-box; /* Fundamental para que el padding no rompa el ancho */
+}
+
+.form-group { 
+    margin-bottom: 15px; 
+}
+
+label { 
+    display: block; 
+    margin-bottom: 5px; 
+    font-weight: bold; 
+}
+
+input { 
+    width: 100%; 
+    padding: 6px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+    font-size: 16px; 
+}
+
+button { 
+    width: 100%; 
+    padding: 12px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    font-size: 16px; 
+    cursor: pointer; 
+}
+
+button:disabled {
+    background-color: #ccc;
+}
+
+.mensaje { 
+    margin-top: 15px; 
+    padding: 10px; 
+    border-radius: 4px; 
+    display: none; 
+    text-align: center; 
+}
+
+.error {
+    background-color: #f8d7da; 
+    color: #721c24; 
+    display: block; 
+}
+.exito {
+    background-color: #d4edda; 
+    color: #155724;
+    display: block;
+}
+
+.modulo-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important; /* Quitamos el padding interno de la card */
+    overflow: hidden;
+}
+
+.modulo-header {
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.modulo-actions {
+    display: flex;
+    flex-direction: column; /* Botones uno sobre otro en móvil */
+    padding: 10px;
+}
+
+.btn-action {
+    text-align: left;
+    padding: 10px 15px;
+    margin: 5px 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #007bff;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.btn-action:hover {
+    background: #f0f7ff;
+}
+
+/* Vista Móvil */
+@media (max-width: 480px) {
+    .form-container {
+        margin: 10px;        /* Reducimos margen para ganar espacio */
+        padding: 15px;       /* Padding interno más ajustado */
+        border-radius: 0;    /* Opcional: bordes rectos para que parezca una app full-width */
+        width: calc(100% - 20px); /* Asegura que no toque los bordes del dispositivo */
+    }
+}
