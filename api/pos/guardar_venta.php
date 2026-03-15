@@ -24,19 +24,25 @@ try {
         else { $ex += $sub; }
     }
 
+    // Obtener Timbrado y Punto de Emisión vigentes desde la BD (Tabla empresa)
+    // Esto asegura integridad: la venta se guarda con la configuración real del servidor.
+    $stmtEmp = $pdo->query("SELECT timbrado_vigente, punto_emision FROM empresa WHERE id = 1");
+    $empresaData = $stmtEmp->fetch(PDO::FETCH_ASSOC);
+    
+    $timbradoReal = $empresaData ? $empresaData['timbrado_vigente'] : null;
+    $puntoEmisionReal = $empresaData ? $empresaData['punto_emision'] : null;
+
     // B. Insertar Cabecera de Venta (timbrado y punto_emision desde Datos del negocio)
     $sqlCab = "INSERT INTO pos_ventas_cabecera 
                (cliente_id, nro_factura, timbrado, punto_emision, gravada_10, iva_10, gravada_5, iva_5, exenta, total_venta) 
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmtCab = $pdo->prepare($sqlCab);
     $clienteId = isset($data['cliente_id']) && $data['cliente_id'] !== '' ? $data['cliente_id'] : null;
-    $timbrado = !empty($data['timbrado']) ? $data['timbrado'] : null;
-    $puntoEmision = !empty($data['punto_emision']) ? $data['punto_emision'] : null;
     $stmtCab->execute([
         $clienteId,
         $data['nro_factura'],
-        $timbrado,
-        $puntoEmision,
+        $timbradoReal,
+        $puntoEmisionReal,
         $g10, $i10, $g5, $i5, $ex, $totalVenta
     ]);
     
