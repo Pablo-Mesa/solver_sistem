@@ -20,7 +20,7 @@ class SifenXML {
      */
     public function generarParaVenta($idVenta) {
         // 1. Obtener datos de la Venta
-        $sqlV = "SELECT v.*, c.razon_social as cliente_nombre, c.ruc as cliente_ruc, c.dv as cliente_dv 
+        $sqlV = "SELECT v.*, c.razon_social as cliente_nombre, c.documento as cliente_ruc, c.dv as cliente_dv 
                  FROM pos_ventas_cabecera v
                  LEFT JOIN pos_clientes c ON v.cliente_id = c.id
                  WHERE v.id = ?";
