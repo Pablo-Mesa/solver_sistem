@@ -24,19 +24,24 @@ if (empty($id) || empty($nombre) || !is_numeric($precio_venta)) {
 // Variable para la URL de la imagen que se guardará en la BD. `null` significa "no cambiar".
 $new_imagen_url = null;
 
+// --- Lógica de rutas dinámicas (Movido arriba para reusar) ---
+$docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
+$appRoot = str_replace('\\', '/', dirname(__DIR__, 3)); // Sube 3 niveles hasta la raíz del proyecto
+$baseUrl = trim(str_replace($docRoot, '', $appRoot), '/');
+$baseUrl = ($baseUrl === '') ? '' : '/' . $baseUrl; // Ej: /solver_16022026/solver
+$upload_dir = $appRoot . '/uploads/products/';
+
+// Asegurarse de que el directorio de subida existe
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
+
 try {
     // 1. Obtener la URL de la imagen actual para poder borrar el archivo si es necesario.
     $stmt_current = $pdo->prepare("SELECT imagen_url FROM pos_productos WHERE id = ?");
     $stmt_current->execute([$id]);
     $current_imagen_url = $stmt_current->fetchColumn();
     
-    // --- Lógica de rutas dinámicas ---
-    // Obtener la ruta base del proyecto para la URL y la ruta física para el servidor.
-    $docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
-    $appRoot = str_replace('\\', '/', dirname(__DIR__, 3)); // Sube 3 niveles hasta la raíz del proyecto
-    $baseUrl = trim(str_replace($docRoot, '', $appRoot), '/');
-    $baseUrl = ($baseUrl === '') ? '' : '/' . $baseUrl; // Ej: /solver_16022026/solver
-    // --- Fin Lógica de rutas ---
 
     // 2. Si se marcó "Eliminar Imagen"
     if ($remove_image_flag === '1' && !empty($current_imagen_url)) {
@@ -58,11 +63,6 @@ try {
         }
 
         // Procesar y mover el nuevo archivo
-        $upload_dir = $appRoot . '/uploads/products/';
-        // Asegurarse de que el directorio de subida existe
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
 
         $file_extension = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
         $unique_filename = 'prod_' . $id . '_' . time() . '.' . $file_extension;
@@ -95,6 +95,53 @@ try {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+
+    // --- 5. Procesar GALERIA (Nuevas Imágenes) ---
+    if (isset($_FILES['galeria'])) {
+        $files = $_FILES['galeria'];
+        $stmtInsertImg = $pdo->prepare("INSERT INTO pos_productos_imagenes (producto_id, imagen_url) VALUES (?, ?)");
+        
+        // Iterar sobre cada archivo subido
+        for ($i = 0; $i < count($files['name']); $i++) {
+            if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                $f_ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+                // Nombre único: prod_ID_gal_TIMESTAMP_INDEX.ext
+                $f_name = 'prod_' . $id . '_gal_' . time() . '_' . $i . '.' . $f_ext;
+                $f_target = $upload_dir . $f_name;
+
+                if (move_uploaded_file($files['tmp_name'][$i], $f_target)) {
+                    $gal_url = $baseUrl . '/uploads/products/' . $f_name;
+                    $stmtInsertImg->execute([$id, $gal_url]);
+                }
+            }
+        }
+    }
+
+    // --- 6. Procesar Eliminación de Imágenes de Galería ---
+    if (!empty($_POST['eliminar_galeria_ids'])) {
+        // Esperamos una cadena separada por comas "1,3,5"
+        $ids_del = array_map('intval', explode(',', $_POST['eliminar_galeria_ids']));
+        $ids_del = array_filter($ids_del); // Eliminar ceros o vacíos
+
+        if (!empty($ids_del)) {
+            $placeholders = implode(',', array_fill(0, count($ids_del), '?'));
+            // Obtener URLs para borrar archivos físicos
+            $sqlGet = "SELECT imagen_url FROM pos_productos_imagenes WHERE id IN ($placeholders) AND producto_id = ?";
+            $paramsGet = array_merge($ids_del, [$id]); // Validamos que pertenezcan al producto actual
+            
+            $stmtGet = $pdo->prepare($sqlGet);
+            $stmtGet->execute($paramsGet);
+            while ($row = $stmtGet->fetch(PDO::FETCH_ASSOC)) {
+                $path = $docRoot . $row['imagen_url'];
+                if (file_exists($path)) unlink($path);
+            }
+            
+            // Borrar de BD
+            $sqlDel = "DELETE FROM pos_productos_imagenes WHERE id IN ($placeholders) AND producto_id = ?";
+            $stmtDel = $pdo->prepare($sqlDel);
+            $stmtDel->execute($paramsGet);
+        }
+    }
 
     echo json_encode(['status' => 'ok', 'mensaje' => 'Producto actualizado con éxito.']);
 

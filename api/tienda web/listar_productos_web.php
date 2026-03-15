@@ -27,6 +27,25 @@ try {
 
     $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // --- LOGICA GALERIA DE IMAGENES ---
+    if (!empty($productos)) {
+        // Obtenemos todos los IDs de los productos listados
+        $ids = array_column($productos, 'id');
+        $inQuery = implode(',', array_fill(0, count($ids), '?'));
+        
+        // Buscamos todas las imágenes extra de estos productos
+        $stmtImg = $pdo->prepare("SELECT producto_id, id, imagen_url FROM pos_productos_imagenes WHERE producto_id IN ($inQuery) ORDER BY id ASC");
+        $stmtImg->execute($ids);
+        
+        // Agrupamos las imágenes por producto
+        $galerias = $stmtImg->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        
+        // Asignamos la galería correspondiente a cada producto
+        foreach ($productos as &$prod) {
+            $prod['galeria'] = isset($galerias[$prod['id']]) ? $galerias[$prod['id']] : [];
+        }
+    }
+
     // Devolvemos una respuesta exitosa con los datos.
     echo json_encode(['status' => 'ok', 'datos' => $productos]);
 
