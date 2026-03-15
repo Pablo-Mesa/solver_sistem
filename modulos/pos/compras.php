@@ -157,7 +157,7 @@
 
 <!-- Modal para Nuevo Producto -->
 <div id="modalProducto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001;">
-    <div class="seccion" style="max-width:500px; margin:1% auto; position:relative;">
+    <div class="seccion" style="max-width:500px; margin:2% auto; position:relative; max-height: 90vh; overflow-y: auto;">
         <h3>📦 Registrar Nuevo Producto</h3>
         <hr style="margin-bottom: 15px;">
         <form id="formRapidoProducto">
