@@ -40,15 +40,42 @@ function renderizarProductos(lista) {
 
     lista.forEach(prod => {
         // Verificar si hay imagen, sino usar placeholder
-        const imagen = prod.imagen_url ? prod.imagen_url : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+        const imagenPrincipal = prod.imagen_url ? prod.imagen_url : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+        
+        // Construimos un array con TODAS las imagenes (Principal + Galería)
+        let imagenes = [imagenPrincipal];
+        if (prod.galeria && Array.isArray(prod.galeria)) {
+            prod.galeria.forEach(g => imagenes.push(g.imagen_url));
+        }
+
         const precio = parseFloat(prod.precio_venta).toLocaleString('es-PY');
         const stock = parseInt(prod.stock_actual);
         const sinStock = stock <= 0;
 
+        // Generamos el HTML de las imagenes para el carrusel
+        let imagesHtml = '';
+        imagenes.forEach((img, index) => {
+            // Solo la primera (índice 0) tendrá la clase 'active'
+            const activeClass = index === 0 ? 'active' : '';
+            imagesHtml += `<img src="${img}" alt="${prod.nombre}" class="product-image ${activeClass}" data-index="${index}">`;
+        });
+
+        // Botones de control (solo si hay más de 1 imagen)
+        let controlsHtml = '';
+        if (imagenes.length > 1) {
+            controlsHtml = `
+                <button class="carousel-btn prev-btn" onclick="cambiarImagen(this, -1)">❮</button>
+                <button class="carousel-btn next-btn" onclick="cambiarImagen(this, 1)">❯</button>
+            `;
+        }
+
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-            <img src="${imagen}" alt="${prod.nombre}" class="product-image" loading="lazy">
+            <div class="product-image-container">
+                ${imagesHtml}
+                ${controlsHtml}
+            </div>
             <div class="product-info">
                 <div class="product-category">${prod.categoria || 'General'}</div>
                 <div class="product-title">${prod.nombre}</div>
@@ -118,4 +145,26 @@ function verCarrito() {
     });
     mensaje += `\nTotal: Gs. ${total.toLocaleString('es-PY')}`;
     alert(mensaje);
+}
+
+// Función para el carrusel de imágenes
+function cambiarImagen(btn, direccion) {
+    // Encontrar el contenedor de la imagen
+    const container = btn.parentElement;
+    const imagenes = container.querySelectorAll('.product-image');
+    let activeIndex = 0;
+
+    // Buscar cual está activa
+    imagenes.forEach((img, index) => {
+        if (img.classList.contains('active')) {
+            activeIndex = index;
+            img.classList.remove('active');
+        }
+    });
+
+    // Calcular nuevo índice (circular)
+    let newIndex = (activeIndex + direccion + imagenes.length) % imagenes.length;
+    
+    // Activar nueva imagen
+    imagenes[newIndex].classList.add('active');
 }

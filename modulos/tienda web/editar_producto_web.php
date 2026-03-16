@@ -148,6 +148,35 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* Estilos para ítems de galería */
+        .gallery-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .btn-delete-gallery {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(220, 53, 69, 0.9); /* Rojo intenso */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 22px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .btn-delete-gallery:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +217,22 @@
                     <input type="hidden" id="remove_image_flag" name="remove_image_flag" value="0">
                 </div>
 
+                <!-- Nueva Sección: Galería de Imágenes -->
+                <div class="form-group" style="border-top: 1px solid #eee; padding-top: 20px;">
+                    <label>Galería de Imágenes (Máx 5)</label>
+                    <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                        Sube imágenes adicionales para mostrar detalles del producto.
+                    </p>
+                    
+                    <!-- Contenedor para ver las imágenes ya guardadas en la galería -->
+                    <div id="gallery-existing-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;"></div>
+
+                    <input type="file" id="galeria" name="galeria[]" multiple accept="image/png, image/jpeg, image/webp">
+                    
+                    <!-- Input oculto para almacenar los IDs de las fotos de galería que el usuario elimine -->
+                    <input type="hidden" id="eliminar_galeria_ids" name="eliminar_galeria_ids" value="">
+                </div>
+
                 <button type="submit" class="btn-guardar">Guardar Cambios</button>
             </form>
         </div>
@@ -202,6 +247,11 @@
         const imageInput = document.getElementById('imagen');
         const btnRemoveImage = document.getElementById('btn-remove-image');
         const removeImageFlag = document.getElementById('remove_image_flag');
+        
+        // Elementos de galería
+        const galleryContainer = document.getElementById('gallery-existing-container');
+        const eliminarGaleriaInput = document.getElementById('eliminar_galeria_ids');
+        let idsEliminados = [];
 
         // Cargar datos actuales del producto
         try {
@@ -220,6 +270,32 @@
                     imagePreview.style.display = 'block';
                     btnRemoveImage.style.display = 'inline-block';
                 }
+
+                // Cargar Galería
+                if (producto.galeria && producto.galeria.length > 0) {
+                    producto.galeria.forEach(img => {
+                        const div = document.createElement('div');
+                        div.className = 'gallery-item';
+                        
+                        div.innerHTML = `
+                            <img src="${img.imagen_url}" style="width:100%; height:100%; object-fit:cover;">
+                            <button type="button" class="btn-delete-gallery" data-id="${img.id}" title="Eliminar foto">&times;</button>
+                        `;
+                        galleryContainer.appendChild(div);
+
+                        // Evento para borrar esta imagen específica
+                        div.querySelector('.btn-delete-gallery').addEventListener('click', function() {
+                            const idGal = this.getAttribute('data-id');
+                            // Agregamos a la lista de eliminados
+                            idsEliminados.push(idGal);
+                            eliminarGaleriaInput.value = idsEliminados.join(',');
+                            
+                            // Quitamos visualmente
+                            div.remove();
+                        });
+                    });
+                }
+
             } else {
                 container.innerHTML = `<p style="color: red;">Error: ${res.mensaje}</p>`;
             }
