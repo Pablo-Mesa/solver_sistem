@@ -52,7 +52,7 @@ function drawCube(element, title, tamanho){
     const titleH1 = document.createElement('h1');
     titleH1.textContent = 'Solver';
     const titleH3 = document.createElement('h3');
-    titleH3.textContent = 'Desarrollo de soluciones';
+    titleH3.textContent = 'Tú tienda online favorita    ';
     titleH3.setAttribute("id", "idUsuarioActivo");
     
     container_title.appendChild(titleH1);

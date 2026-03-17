@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" /> 
     <title>Solver | Tienda Online</title>
     <link rel="icon" href="../../assets/icono_solver_nobg.png" />
-
     <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/css_cubo.css">
     <!-- Hoja de estilos específica para la tienda -->
     <link rel="stylesheet" href="css/tienda.css">
 </head>
@@ -18,7 +18,8 @@
     <!-- Header Fijo -->
     <header class="store-header">
         <div class="container-store-brand">
-            <a href="#" class="store-brand">Solver Store</a>
+            <div id="here_cube"></div>
+            <!-- <a href="#" class="store-brand">Solver Store</a> -->
             <a href="../../dashboard.php" class="back-to-dashboard" >Dashboard</a>            
         </div>
         <div class="store-controls">
@@ -48,5 +49,11 @@
 
     <!-- Script de lógica de la tienda -->
     <script src="js/tienda.js"></script>
+    <script src="../../js/tool-kit-v002.js"></script>
+    <script>
+        // Llamamos a la función para dibujar el cubo en el div 'here_cube'
+        // La sintaxis es: drawCube(selector_destino, mostrar_titulo, tamaño);
+        drawCube('#here_cube', true, '28px');
+    </script>
 </body>
 </html>

@@ -3,12 +3,14 @@ let carrito = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
-
     // Listener para el buscador en tiempo real
     document.getElementById('buscador').addEventListener('keyup', (e) => {
         filtrarProductos(e.target.value);
     });
+    actualizarContadorCarrito();    
 });
+
+/*drawCube(element, title, tamanho)*/
 
 async function cargarProductos() {
     const grid = document.getElementById('grid-productos');
