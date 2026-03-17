@@ -36,10 +36,8 @@ if ($tipo === 'ventas') {
                 c.dv, 
                 c.razon_social, 
                 v.fecha_hora, 
-                v.timbrado, 
-                v.nro_factura, 
                 v.gravada_10, v.iva_10, 
-                v.gravada_5, v.iva_5, 
+                v.gravada_5, v.iva_5,
                 v.exenta, 
                 v.total_venta
             FROM pos_ventas_cabecera v
@@ -58,18 +56,17 @@ if ($tipo === 'ventas') {
         $fecha = date('d/m/Y', strtotime($row['fecha_hora']));
 
         // Tipo Comprobante: 109 = Factura (Valor estándar SET)
-        $tipo_comp = 109; 
+        $tipo_comp = 109;
 
-        // Condición: Por defecto 1 (Contado) si no tienes el campo en BD aún
-        $condicion = 1; 
+        // Condición: 1=Contado. Se asume contado ya que la columna no existe en la BD.
+        $condicion = 1;
 
         fputcsv($output, [
             $ruc_completo,
             $row['razon_social'],
             $tipo_comp,
             $fecha,
-            $row['timbrado'] ?? '0', // Timbrado es obligatorio
-            $row['nro_factura'],
+            '0', //
             $row['gravada_10'],
             $row['iva_10'],
             $row['gravada_5'],

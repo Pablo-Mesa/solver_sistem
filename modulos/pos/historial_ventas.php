@@ -31,6 +31,18 @@
                 display: revert;
             }
         }
+        /* Estilo para el número de factura editable (Pedidos Web) */
+        .nro-factura-editable {
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .nro-factura-editable:hover {
+            color: #0a58ca;
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>

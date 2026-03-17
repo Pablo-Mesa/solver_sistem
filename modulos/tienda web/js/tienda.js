@@ -1,5 +1,6 @@
 let productosGlobal = [];
 let carrito = [];
+let currentStep = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
@@ -8,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
         filtrarProductos(e.target.value);
     });
     actualizarContadorCarrito();    
+
+    // Cerrar al hacer click fuera del modal (Overlay)
+    document.getElementById('cart-overlay').addEventListener('click', toggleCart);
 });
 
 /*drawCube(element, title, tamanho)*/
@@ -113,16 +117,84 @@ function agregarAlCarrito(id) {
         if(existente) {
             if(existente.cantidad < prod.stock_actual) {
                 existente.cantidad++;
-                alert(`Se agregó otra unidad de: ${prod.nombre}`);
+                // Usamos showToast si está disponible (tool-kit), sino un log silencioso
+                if(typeof showToast === 'function') showToast(`+1 ${prod.nombre}`, '#28a745');
             } else {
                 alert("No hay más stock disponible.");
                 return;
             }
         } else {
             carrito.push({ ...prod, cantidad: 1 });
-            alert(`Agregado al carrito: ${prod.nombre}`);
+            if(typeof showToast === 'function') showToast(`Agregado: ${prod.nombre}`, '#28a745');
         }
         actualizarContadorCarrito();
+        renderizarCarrito(); // Actualizar visualmente el modal
+    }
+}
+
+function eliminarDelCarrito(id) {
+    carrito = carrito.filter(item => item.id !== id);
+    actualizarContadorCarrito();
+    renderizarCarrito();
+}
+
+function actualizarCantidad(id, cambio) {
+    const item = carrito.find(i => i.id === id);
+    if(item) {
+        const nuevaCant = item.cantidad + cambio;
+        if(nuevaCant > 0 && nuevaCant <= item.stock_actual) {
+            item.cantidad = nuevaCant;
+        } else if (nuevaCant <= 0) {
+            eliminarDelCarrito(id);
+            return; // Salimos porque eliminar ya renderiza
+        } else {
+            alert("Stock máximo alcanzado para este producto.");
+            return;
+        }
+        actualizarContadorCarrito();
+        renderizarCarrito();
+    }
+}
+
+function renderizarCarrito() {
+    const container = document.getElementById('cart-items-container');
+    const totalLabel = document.getElementById('cart-total-amount');
+    if(!container) return;
+
+    container.innerHTML = '';
+    let total = 0;
+
+    if(carrito.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Tu carrito está vacío.</p>';
+        if(totalLabel) totalLabel.innerText = '0 Gs.';
+        return;
+    }
+
+    carrito.forEach(item => {
+        const subtotal = item.precio_venta * item.cantidad;
+        total += subtotal;
+
+        // Creamos el elemento visual
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+            <img src="${item.imagen_url || '../../assets/no-image.png'}" class="cart-item-img" alt="Img">
+            <div class="cart-item-details">
+                <div class="cart-item-title">${item.nombre}</div>
+                <div class="cart-item-price">${parseInt(item.precio_venta).toLocaleString('es-PY')} Gs.</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <button onclick="actualizarCantidad(${item.id}, -1)" style="width:25px; height:25px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:3px;">-</button>
+                <span style="min-width:20px; text-align:center; font-weight:bold;">${item.cantidad}</span>
+                <button onclick="actualizarCantidad(${item.id}, 1)" style="width:25px; height:25px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:3px;">+</button>
+            </div>
+            <button onclick="eliminarDelCarrito(${item.id})" style="margin-left:10px; border:none; background:none; color:#dc3545; font-size:1.2rem; cursor:pointer;">&times;</button>
+        `;
+        container.appendChild(div);
+    });
+
+    if(totalLabel) {
+        totalLabel.innerText = total.toLocaleString('es-PY') + ' Gs.';
     }
 }
 
@@ -132,21 +204,13 @@ function actualizarContadorCarrito() {
 }
 
 function verCarrito() {
-    if(carrito.length === 0) {
-        alert("El carrito está vacío.");
-        return;
+    // Abrir el modal (función definida en tienda.php)
+    if(typeof toggleCart === 'function') {
+        renderizarCarrito(); // Aseguramos que esté actualizado al abrir
+        toggleCart();
+    } else {
+        console.error("Función toggleCart no encontrada.");
     }
-    // Aquí podrías redirigir a una página de checkout o abrir un modal
-    // Por ahora, solo mostramos un resumen básico
-    let mensaje = "Tu Carrito:\n\n";
-    let total = 0;
-    carrito.forEach(item => {
-        const subtotal = item.precio_venta * item.cantidad;
-        mensaje += `- ${item.nombre} (x${item.cantidad}): Gs. ${subtotal.toLocaleString('es-PY')}\n`;
-        total += subtotal;
-    });
-    mensaje += `\nTotal: Gs. ${total.toLocaleString('es-PY')}`;
-    alert(mensaje);
 }
 
 // Función para el carrusel de imágenes
@@ -169,4 +233,123 @@ function cambiarImagen(btn, direccion) {
     
     // Activar nueva imagen
     imagenes[newIndex].classList.add('active');
+}
+
+/* --- LÓGICA DEL MODAL Y CHECKOUT --- */
+
+function toggleCart() {
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('cart-overlay');
+    drawer.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+function toggleDeliveryAddress(show) {
+    const fields = document.getElementById('address-fields');
+    fields.style.display = show ? 'block' : 'none';
+}
+
+function showStep(step) {
+    // Ocultar todos los pasos
+    document.querySelectorAll('.checkout-step').forEach(el => el.classList.remove('active'));
+    // Mostrar paso actual
+    document.getElementById(`step-${step}`).classList.add('active');
+    
+    // Actualizar botones y títulos según el paso
+    const btnMain = document.getElementById('btn-main-action');
+    const btnBack = document.getElementById('btn-back-action');
+    const title = document.getElementById('cart-title');
+
+    if (step === 1) {
+        title.innerText = "Tu Carrito";
+        btnMain.innerText = "Iniciar Pedido";
+        btnBack.style.display = 'none';
+    } else if (step === 2) {
+        title.innerText = "Datos de Entrega";
+        btnMain.innerText = "Ir al Pago";
+        btnBack.style.display = 'block';
+    } else if (step === 3) {
+        title.innerText = "Confirmar Pago";
+        btnMain.innerText = "Finalizar Compra";
+        btnBack.style.display = 'block';
+    }
+    currentStep = step;
+}
+
+function nextStep() {
+    if (currentStep === 1) {
+        if (carrito.length === 0) {
+            alert("Tu carrito está vacío.");
+            return;
+        }
+        showStep(2);
+    } else if (currentStep === 2) {
+        // Validaciones del paso 2
+        const deliveryType = document.querySelector('input[name="delivery_type"]:checked').value;
+        const nombre = document.getElementById('nombre_contacto').value.trim();
+        
+        if (deliveryType === 'delivery') {
+            const dir = document.getElementById('direccion').value.trim();
+            const tel = document.getElementById('telefono').value.trim();
+            if (!dir || !tel) {
+                alert("Para envíos por Delivery, la dirección y el teléfono son obligatorios.");
+                return;
+            }
+        }
+        
+        showStep(3);
+    } else if (currentStep === 3) {
+        finalizarCompra();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        showStep(currentStep - 1);
+    }
+}
+
+async function finalizarCompra() {
+    const btnMain = document.getElementById('btn-main-action');
+    btnMain.disabled = true;
+    btnMain.innerText = "Procesando...";
+
+    const datosPedido = {
+        items: carrito,
+        nombre_contacto: document.getElementById('nombre_contacto').value.trim(),
+        delivery_type: document.querySelector('input[name="delivery_type"]:checked').value,
+        direccion: document.getElementById('direccion').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        observacion: document.getElementById('observacion').value.trim(),
+        pago: document.querySelector('input[name="pago"]:checked').value
+    };
+
+    try {
+        const response = await fetch('../../api/tienda web/guardar_pedido_web.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosPedido)
+        });
+
+        const res = await response.json();
+
+        if (res.status === 'ok') {
+            alert(`✅ ¡Pedido realizado con éxito!\nID de Pedido: #${res.pedido_id}`);
+            // Resetear carrito y formulario
+            carrito = [];
+            actualizarContadorCarrito();
+            renderizarCarrito();
+            toggleCart(); // Cerrar modal
+            showStep(1);  // Volver al paso 1
+        } else {
+            alert("❌ Error al guardar el pedido: " + res.mensaje);
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error de conexión al procesar el pedido.");
+    } finally {
+        btnMain.disabled = false;
+        if(currentStep === 3) btnMain.innerText = "Finalizar Compra";
+    }
 }

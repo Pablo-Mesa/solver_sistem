@@ -22,7 +22,7 @@ try {
     $empresa = $stmtEmp->fetch(PDO::FETCH_ASSOC);
 
     // Cabecera de la venta + cliente
-    $sqlVenta = "SELECT v.id, v.nro_factura, v.timbrado, v.punto_emision, v.fecha_hora,
+    $sqlVenta = "SELECT v.id, v.nro_factura, v.fecha_hora,
                         v.gravada_10, v.iva_10, v.gravada_5, v.iva_5, v.exenta, v.total_venta,
                         c.documento, c.dv AS cliente_dv, c.razon_social AS cliente_nombre,
                         c.direccion AS cliente_direccion, c.email AS cliente_email
@@ -50,8 +50,8 @@ try {
 }
 
 // Valores de timbrado y punto de emisión a mostrar
-$timbradoMostrar = $venta['timbrado'] ?: ($empresa['timbrado_vigente'] ?? '');
-$puntoMostrar = $venta['punto_emision'] ?: ($empresa['punto_emision'] ?? '001');
+$timbradoMostrar = $empresa['timbrado_vigente'] ?? '';
+$puntoMostrar = $empresa['punto_emision'] ?? '001';
 $sucursalMostrar = $empresa['sucursal'] ?? '001';
 
 function formato_num($n) {
@@ -216,4 +216,3 @@ function formato_num($n) {
 
 </body>
 </html>
-

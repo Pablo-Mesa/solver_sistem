@@ -14,9 +14,15 @@ async function cargarHistorialVentas() {
                 const fila = document.createElement('tr');
                 if (v.estado == 0) fila.classList.add('anulado');
 
+                // Lógica para detectar pedidos Web y hacerlos editables
+                let nroFacturaHTML = v.nro_factura;
+                if (v.nro_factura && v.nro_factura.startsWith('WEB-')) {
+                    nroFacturaHTML = `<span class="nro-factura-editable" onclick="editarNroFactura(${v.id}, '${v.nro_factura}')" title="Click para editar">${v.nro_factura} ✏️</span>`;
+                }
+
                 fila.innerHTML = `
                     <td>${v.fecha_hora}</td>
-                    <td>${v.nro_factura}</td>
+                    <td>${nroFacturaHTML}</td>
                     <td><strong>${Number(v.total_venta).toLocaleString('es-PY')} Gs.</strong></td>
                     <td>${v.estado == 1 ? '✅ Pagado' : '🚫 Anulado'}</td>
                     <td>
@@ -95,4 +101,35 @@ function cerrarModalVenta() {
 
 function imprimirFactura(id) {
     window.open(`factura_venta.php?id=${id}`, '_blank');
+}
+
+// --- FUNCIONES PARA EDICIÓN DE PEDIDOS WEB ---
+
+function editarNroFactura(ventaId, nroActual) {
+    const nuevoNro = prompt(`Editar número de factura para el pedido:\n${nroActual}\n\nIngrese el nuevo número de factura fiscal (ej: 001-001-0001234):`, '');
+    
+    if (nuevoNro && nuevoNro.trim() !== '' && nuevoNro.trim() !== nroActual) {
+        actualizarNroFacturaAPI(ventaId, nuevoNro.trim());
+    }
+}
+
+async function actualizarNroFacturaAPI(ventaId, nuevoNro) {
+    try {
+        const response = await fetch('../../api/pos/actualizar_nro_factura.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: ventaId, nro_factura: nuevoNro })
+        });
+        const res = await response.json();
+
+        if (res.status === 'ok') {
+            alert('✅ ' + res.mensaje);
+            cargarHistorialVentas(); // Recargar la tabla para ver el cambio
+        } else {
+            alert('❌ Error: ' + res.mensaje);
+        }
+    } catch (error) {
+        console.error('Error al actualizar:', error);
+        alert('Ocurrió un error de conexión.');
+    }
 }
