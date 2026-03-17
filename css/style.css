@@ -126,3 +126,4 @@ button:disabled {
         width: calc(100% - 20px); /* Asegura que no toque los bordes del dispositivo */
     }
 }
+

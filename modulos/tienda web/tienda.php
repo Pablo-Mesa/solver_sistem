@@ -17,15 +17,17 @@
 
     <!-- Header Fijo -->
     <header class="store-header">
-        <a href="#" class="store-brand">Solver Store</a>
+        <div class="container-store-brand">
+            <a href="#" class="store-brand">Solver Store</a>
+            <a href="../../dashboard.php" class="back-to-dashboard" >Dashboard</a>            
+        </div>
         <div class="store-controls">
             <div class="search-box">
                 <input type="text" id="buscador" placeholder="Buscar productos...">
             </div>
             <button class="cart-btn" onclick="verCarrito()">
                 🛒 <span id="cart-count" class="cart-count">0</span>
-            </button>
-            <a href="../../dashboard.php" style="color: #007bff; text-decoration: none; font-size: 0.9rem;">Dashboard</a>
+            </button>            
         </div>
     </header>
 
