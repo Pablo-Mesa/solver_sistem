@@ -17,7 +17,7 @@
 
     <!-- Header Fijo -->
     <header class="store-header">
-        <div class="container-store-brand">
+        <div class="container-store-brand"> 
             <div id="here_cube"></div>
             <!-- <a href="#" class="store-brand">Solver Store</a> -->
             <a href="../../dashboard.php" class="back-to-dashboard" >Dashboard</a>            
